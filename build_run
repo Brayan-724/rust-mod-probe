@@ -1,0 +1,10 @@
+#!/usr/bin/env nu
+
+def main [] {
+  cd rust
+  cargo build
+
+  cd ..
+  $env.LD_LIBRARY_PATH = $"($env.LD_LIBRARY_PATH):(pwd)/rust/target/debug/"
+  ./gradlew runClient
+}
