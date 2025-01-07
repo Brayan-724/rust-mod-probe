@@ -44,6 +44,8 @@
       ];
 
       LD_LIBRARY_PATH = "${pkgs.addDriverRunpath.driverLink}/lib:${pkgs.lib.makeLibraryPath libraries}";
+
+      RUST_BACKTRACE = "1";
     };
   };
 }

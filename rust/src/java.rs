@@ -1,59 +1,83 @@
+mod macros;
+pub mod primitives;
+
 use jni::{
-    objects::{JObject, JString},
+    objects::{JObject, JValueOwned},
     JNIEnv,
 };
 
-pub const JAVA_STRING: &str = "java/lang/String";
+pub use macros::*;
+use primitives::Function;
 
-pub struct Identifier;
+pub trait IntoJValue {
+    fn into_jvalue<'local>(self, env: &mut JNIEnv<'local>) -> JValueOwned<'local>;
+}
 
-impl Identifier {
-    pub const MINECRAFT_IDENTIFIER: &str = "net/minecraft/util/Identifier";
-    pub const MINECRAFT_IDENTIFIER_OF: &str =
-        "(Ljava/lang/String;Ljava/lang/String;)Lnet/minecraft/util/Identifier;";
-
-    pub fn of<'local>(
-        env: &mut JNIEnv<'local>,
-        mod_id: JString<'local>,
-        id: JString<'local>,
-    ) -> JObject<'local> {
-        let identifier_class = env
-            .find_class(Identifier::MINECRAFT_IDENTIFIER)
-            .expect("Cannot get Identifier class");
-
-        env.call_static_method(
-            identifier_class,
-            "of",
-            Identifier::MINECRAFT_IDENTIFIER_OF,
-            &[(&mod_id).into(), (&id).into()],
-        )
-        .expect("Cannot generate Identifier")
-        .l()
-        .expect("Cannot convert to JObject")
+impl IntoJValue for String {
+    fn into_jvalue<'local>(self, env: &mut JNIEnv<'local>) -> JValueOwned<'local> {
+        env.new_string(self).unwrap().into()
     }
 }
 
-pub struct Items;
+impl IntoJValue for JObject<'_> {
+    fn into_jvalue<'local>(self, env: &mut JNIEnv<'local>) -> JValueOwned<'local> {
+        env.new_local_ref(self).unwrap().into()
+    }
+}
 
-impl Items {
-    pub const MINECRAFT_ITEM: &str = "net/minecraft/item/Item";
-    pub const MINECRAFT_ITEMS: &str = "net/minecraft/item/Items";
-    pub const MINECRAFT_ITEMS_REGISTER: &str =
-        "(Lnet/minecraft/registry/RegistryKey;Ljava/util/function/Function;Lnet/minecraft/item/Item$Settings;)Lnet/minecraft/item/Item;";
+pub trait JSignature {
+    fn sig() -> String;
 
+    fn sig_type() -> String {
+        let sig = Self::sig();
+        let mut out = String::with_capacity(sig.len() + 2);
+
+        out.push('L');
+        out.push_str(&sig);
+        out.push(';');
+
+        out
+    }
+}
+
+new_class!{RustBridge: "com/apika_probe_1/RustBridge" {
+  static registerGroupEvent fn register_group_event(event: Event, item: Item);
+}}
+
+new_class! {Event: "net/fabricmc/fabric/api/event/Event" {}}
+
+impl Event<'_> {
+    pub fn register<'local>(self, env: &mut JNIEnv<'local>, item: Item) {
+        RustBridge::register_group_event(env, self, item)
+    }
+}
+
+new_class! {Identifier: "net/minecraft/util/Identifier" {
+    static fn of(mod_id: String, id: String) -> Identifier<'local>;
+}}
+
+new_class! {Item: "net/minecraft/item/Item" {}}
+
+new_enum! {ItemGroups [RegistryKey]: "net/minecraft/item/ItemGroups" {
+    REDSTONE
+}}
+
+new_class! {ItemGroupEvents: "net/fabricmc/fabric/api/itemgroup/v1/ItemGroupEvents" {
+    static modifyEntriesEvent fn modify_entries_event(registry_key: ItemGroups) -> Event<'local>;
+}}
+
+new_class! {ItemSettings: "net/minecraft/item/Item$Settings" {}}
+
+new_class! {Items: "net/minecraft/item/Items" {
+    static register fn register_raw(key: RegistryKey<'local>, factory: Function<'local>, settings: ItemSettings<'local>) -> Item<'local>;
+}}
+
+impl Items<'_> {
     pub fn register<'local>(
         env: &mut JNIEnv<'local>,
-        key: JObject<'local>,
-        settings: JObject<'local>,
-    ) -> JObject<'local> {
-        let items_class = env
-            .find_class(Items::MINECRAFT_ITEMS)
-            .expect("Cannot get Items class");
-
-        let item_class = env
-            .find_class(Items::MINECRAFT_ITEM)
-            .expect("Cannot get Item class");
-
+        key: RegistryKey<'local>,
+        settings: ItemSettings<'local>,
+    ) -> Item<'local> {
         let factory = {
             let class = env.find_class("com/apika_probe_1/RustBridge").unwrap();
 
@@ -63,62 +87,16 @@ impl Items {
                 .unwrap()
         };
 
-        // let factory = env
-        //     // .get_static_field(&items_class, "new", "Ljava/util/function/Function;")
-        //     .get_static_field(&items_class, "new", "Lnet/minecraft/item/Item$Item;")
-        //     // .get_static_method_id(&items_class, "new", "(Lnet/minecraft/item/Item$Settings;)Lnet/minecraft/item/Item;")
-        //     .unwrap();
-
-        // let factory = unsafe {
-        //     let jni_interface = (*env.get_native_interface()).as_ref().unwrap();
-        //     // fn(_: *mut *const JNINativeInterface_, _: *mut _jobject, _: *mut _jmethodID, _: u8)
-        //     let to_reflected_method = jni_interface.ToReflectedMethod.unwrap();
-        //     let factory = to_reflected_method(
-        //         env.get_native_interface(),
-        //         **items_class,
-        //         factory.into_raw(),
-        //         0,
-        //     );
-        //     JObject::from_raw(factory)
-        // };
-
-        env.call_static_method(
-            items_class,
-            "register",
-            Items::MINECRAFT_ITEMS_REGISTER,
-            &[(&key).into(), (&factory).into(), (&settings).into()],
-        )
-        .expect("Cannot generate Item")
-        .l()
-        .expect("Cannot convert to JObject")
+        Self::register_raw(env, key, factory.into(), settings)
     }
 }
 
-pub struct RegistryKey;
+new_class! {ModifyEntries: "net/fabricmc/fabric/api/itemgroup/v1/ItemGroupEvents$ModifyEntries" {}}
 
-impl RegistryKey {
-    pub const MINECRAFT_REGISTRYKEY: &str = "net/minecraft/registry/RegistryKey";
-    pub const MINECRAFT_REGISTRYKEYS: &str = "net/minecraft/registry/RegistryKeys";
+new_class! {RegistryKey: "net/minecraft/registry/RegistryKey" {
+    static fn of(kind: RegistryKeys, id: Identifier<'local>) -> RegistryKey<'local>;
+}}
 
-    pub const MINECRAFT_REGISTRYKEY_OF: &str = "(Lnet/minecraft/registry/RegistryKey;Lnet/minecraft/util/Identifier;)Lnet/minecraft/registry/RegistryKey;";
-
-    pub fn of<'local>(
-        env: &mut JNIEnv<'local>,
-        kind: JObject<'local>,
-        id: JObject<'local>,
-    ) -> JObject<'local> {
-        let registry_class = env
-            .find_class(RegistryKey::MINECRAFT_REGISTRYKEY)
-            .expect("Cannot get RegistryKey class");
-
-        env.call_static_method(
-            registry_class,
-            "of",
-            RegistryKey::MINECRAFT_REGISTRYKEY_OF,
-            &[(&kind).into(), (&id).into()],
-        )
-        .expect("Cannot generate RegistryKey")
-        .l()
-        .expect("Cannot convert to JObject")
-    }
-}
+new_enum! {RegistryKeys [RegistryKey]: "net/minecraft/registry/RegistryKeys" {
+    ITEM
+}}

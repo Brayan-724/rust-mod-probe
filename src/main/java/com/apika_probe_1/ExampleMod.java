@@ -20,6 +20,7 @@ public class ExampleMod implements ModInitializer {
 		// Proceed with mild caution.
 
 		LOGGER.info("Hello Fabric world!");
+    RustBridge.main();
     ModItems.initialize();
 	}
 }
