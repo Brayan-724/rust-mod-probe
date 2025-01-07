@@ -16,16 +16,16 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.apika_probe_1.ExampleMod"
+			"me.apika.apikaprobe.ExampleMod"
 		],
 		"client": [
-			"com.apika_probe_1.ExampleModClient"
+			"me.apika.apikaprobe.ExampleModClient"
 		]
 	},
 	"mixins": [
-		"apika_probe_1.mixins.json",
+		"apikaprobe.mixins.json",
 		{
-			"config": "apika_probe_1.client.mixins.json",
+			"config": "apikaprobe.client.mixins.json",
 			"environment": "client"
 		}
 	],
@@ -35,6 +35,5 @@
 		"java": ">=21",
 		"fabric-api": "*"
 	},
-	"suggests": {
-	}
+	"suggests": { }
 }

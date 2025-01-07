@@ -40,7 +40,7 @@ pub trait JSignature {
     }
 }
 
-new_class!{RustBridge: "com/apika_probe_1/RustBridge" {
+new_class!{RustBridge: "me/apika/apikaprobe/RustBridge" {
   static registerGroupEvent fn register_group_event(event: Event, item: Item);
 }}
 
@@ -79,7 +79,7 @@ impl Items<'_> {
         settings: ItemSettings<'local>,
     ) -> Item<'local> {
         let factory = {
-            let class = env.find_class("com/apika_probe_1/RustBridge").unwrap();
+            let class = RustBridge::class(env);
 
             env.call_static_method(class, "getItemNew", "()Ljava/util/function/Function;", &[])
                 .unwrap()

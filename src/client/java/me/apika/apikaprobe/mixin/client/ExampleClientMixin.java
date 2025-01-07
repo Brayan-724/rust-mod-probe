@@ -1,4 +1,4 @@
-package com.apika_probe_1.mixin.client;
+package me.apika.apikaprobe.mixin.client;
 
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;

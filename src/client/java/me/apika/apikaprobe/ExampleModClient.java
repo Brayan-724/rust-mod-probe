@@ -1,4 +1,4 @@
-package com.apika_probe_1;
+package me.apika.apikaprobe;
 
 import net.fabricmc.api.ClientModInitializer;
 

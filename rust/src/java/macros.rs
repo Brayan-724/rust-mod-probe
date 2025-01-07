@@ -25,7 +25,7 @@ macro_rules! impl_methods {
 
                 println!("CALLING: {} : {sig}", stringify!($raw));
 
-                let class = env.find_class(<$class as $crate::java::JSignature>::sig()).unwrap();
+                let class = Self::class(env);
 
                 let _ret = env
                     .call_static_method(class, stringify!($raw), sig, &[$($arg.borrow()),*])
@@ -108,9 +108,15 @@ macro_rules! new_class {
         impl $name<'_> {
             #[allow(dead_code)]
             pub fn new<'local>(env: &mut ::jni::JNIEnv<'local>) -> $name<'local> {
-                let class = env.find_class(<$name as $crate::java::JSignature>::sig()).unwrap();
+                let class = Self::class(env);
 
                 env.new_object(class, "()V", &[]).unwrap().into()
+            }
+
+            #[allow(dead_code)]
+            #[inline(always)]
+            pub fn class<'local>(env: &mut ::jni::JNIEnv<'local>) -> ::jni::objects::JClass<'local> {
+                env.find_class(<$name as $crate::java::JSignature>::sig()).unwrap()
             }
         }
 

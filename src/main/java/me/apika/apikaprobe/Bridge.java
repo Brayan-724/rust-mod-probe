@@ -1,4 +1,4 @@
-package com.apika_probe_1;
+package me.apika.apikaprobe;
 
 import java.util.function.Function;
 
@@ -22,6 +22,4 @@ class RustBridge {
   }
 
   public static native void main();
-
-  public static native Item register(String id, Item.Settings settings);
 }

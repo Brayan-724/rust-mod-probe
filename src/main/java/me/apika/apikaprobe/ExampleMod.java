@@ -1,4 +1,4 @@
-package com.apika_probe_1;
+package me.apika.apikaprobe;
 
 import net.fabricmc.api.ModInitializer;
 
@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ExampleMod implements ModInitializer {
-	public static final String MOD_ID = "apika_probe_1";
+	public static final String MOD_ID = "apikaprobe";
 
 	// This logger is used to write text to the console and the log file.
 	// It is considered best practice to use your mod id as the logger's name.

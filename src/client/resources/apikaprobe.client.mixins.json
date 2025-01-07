@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "com.apika_probe_1.mixin.client",
+	"package": "me.apika.apikaprobe.mixin.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"ExampleClientMixin"
