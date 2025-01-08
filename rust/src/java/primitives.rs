@@ -6,11 +6,11 @@ macro_rules! primitive {
     ($class:ident, $sig:literal, $sig_type:literal) => {
         impl $crate::java::JSignature for $class {
             fn sig() -> String {
-                $sig.to_owned()
+                $sig_type.to_owned()
             }
 
             fn sig_type() -> String {
-                concat!("L", $sig_type, ";").to_owned()
+                $sig.to_owned()
             }
         }
     };
