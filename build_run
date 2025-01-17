@@ -5,6 +5,7 @@ def main [] {
   cargo build
 
   cd ..
-  $env.LD_LIBRARY_PATH = $"($env.LD_LIBRARY_PATH):(pwd)/rust/target/debug/"
+  $env.LD_LIBRARY_PATH = $"($env.LD_LIBRARY_PATH):(pwd)/target/debug/"
+  $env.RUST_BACKTRACE = "1"
   ./gradlew runClient
 }

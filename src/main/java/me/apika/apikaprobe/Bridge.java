@@ -26,13 +26,7 @@ class SerjioItem extends Item {
   public native ActionResult use(World world, PlayerEntity user, Hand hand);
 
   // @Override public ActionResult use(World world, PlayerEntity user, Hand hand) {
-  //   if (world.isClient) {
-  //     return ActionResult.PASS;
-  //   }
-  //
-  //   Vec3d raycast = user.getRotationVector().multiply(2).add(user.getBlockPos().toCenterPos());
-  //
-  //     return ActionResult.PASS;
+  //   Text
   // };
 }
 
@@ -55,7 +49,7 @@ class RustBridge {
   public static Item SERJIO = null;
 
   static {
-    System.loadLibrary("rust_bridge");
+    System.loadLibrary("rust_mod");
   }
 
   public static native void main();

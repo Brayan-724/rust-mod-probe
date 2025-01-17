@@ -1,0 +1,6 @@
+[workspace]
+members = [
+  "rust/api",
+  "rust/macros",
+  "rust/mod",
+]

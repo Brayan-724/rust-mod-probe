@@ -1,0 +1,13 @@
+[package]
+name = "probe_macros"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["proc-macro"]
+
+[dependencies]
+case = "1.0.0"
+proc-macro2 = "1.0.92"
+quote = "1.0.38"
+syn = { version = "2.0.95", features = ["visit", "fold", "full"] }
