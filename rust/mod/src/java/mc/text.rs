@@ -4,7 +4,7 @@ use probe::{class::Instance, JavaClass};
 #[package(net.minecraft.text)]
 pub struct Text {
     #[instance]
-    pub raw: Instance
+    pub raw: Instance,
 }
 
 #[probe::import]

@@ -4,7 +4,7 @@ pub mod primitives;
 
 use class::Instance;
 use conversion::{FromJValue, IntoJValue};
-pub use probe_macros::*;
+pub use rosttasse_macros::*;
 
 pub trait JSignature {
     const CLASS: &'static str;

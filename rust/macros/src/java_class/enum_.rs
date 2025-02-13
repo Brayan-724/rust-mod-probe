@@ -60,9 +60,7 @@ pub fn main_enum(input: &DeriveInput, data: &DataEnum) -> Result<TokenStream, Er
                 let variant_name = get_string_attr(variant.span(), &"variant", &variant.attrs)?;
 
                 let name = &variant.ident;
-                let name = rename
-                    .map(|n| n)
-                    .unwrap_or(name.to_string());
+                let name = rename.map(|n| n).unwrap_or(name.to_string());
 
                 let variant_sig = if !is_itself {
                     quote!(#struct_class::sig())

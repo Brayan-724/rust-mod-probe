@@ -9,24 +9,6 @@ use probe::{
 
 #[derive(JavaClass)]
 #[package(me.apika.apikaprobe)]
-pub struct RustBridge {
-    #[instance]
-    pub raw: Instance,
-}
-
-#[probe::import]
-impl RustBridge {
-    pub const SERJIO: Item;
-
-    // Automatic casing
-    pub fn register_group_event(event: Event, item: Item);
-
-    // Manual casing
-    pub extern "itemFactory" fn item_factory(item: JClass) -> Function;
-}
-
-#[derive(JavaClass)]
-#[package(me.apika.apikaprobe)]
 struct SerjioItem(#[instance] pub Instance);
 
 #[derive(JavaClass)]

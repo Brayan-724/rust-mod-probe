@@ -1,5 +1,5 @@
 [package]
-name = "probe_macros"
+name = "rosttasse_macros"
 version = "0.1.0"
 edition = "2021"
 
