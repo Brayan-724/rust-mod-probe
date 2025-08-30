@@ -214,6 +214,18 @@ fn bind_def_class(
         })
         .collect_vec();
 
+    let constructor = quote_spanned! {class.span() =>
+        #[allow(dead_code)]
+        pub fn default<'local>(env: &mut ::jni::JNIEnv<'local>) -> Self {
+            let instance: ::rosttasse::prelude::Instance = env
+                .new_object(<Self as ::rosttasse::prelude::JSignature>::CLASS, "()V", &[])
+                .unwrap()
+                .into();
+
+            <Self as ::rosttasse::prelude::JavaClass>::from_raw(instance)
+        }
+    };
+
     let sig = generate_signature(&class, package);
 
     let other_fields = props
@@ -238,6 +250,7 @@ fn bind_def_class(
     );
 
     quote! {
+        #[derive(Clone, Copy)]
         pub struct #class {
             raw: ::rosttasse::prelude::Instance,
 
@@ -250,6 +263,8 @@ fn bind_def_class(
 
         impl #class {
             #(#static_props)*
+
+            #constructor
 
             #(#methods)*
         }
@@ -351,10 +366,13 @@ struct MethodInfo {
     def_args: proc_macro2::TokenStream,
     extern_name: proc_macro2::TokenStream,
     get_sig_args: proc_macro2::TokenStream,
+    is_contructor: bool,
     ret: proc_macro2::TokenStream,
 }
 
 fn prepare_method(method: &BindFieldMethod) -> MethodInfo {
+    let is_contructor = get_attribute(&"constructor", &method.attributes).is_some();
+
     let extern_name = method.name.to_string().as_str().to_camel_lowercase();
     let extern_name = quote!(#extern_name);
 
@@ -391,8 +409,11 @@ fn prepare_method(method: &BindFieldMethod) -> MethodInfo {
         syn::ReturnType::Type(_, ty) => quote_spanned! {ty.span() => #ty},
     };
 
-    let out_ty_sig =
-        quote_spanned! {out_ty.span() => <#out_ty as ::rosttasse::prelude::JSignature>::sig()};
+    let out_ty_sig = if is_contructor {
+        quote_spanned! {out_ty.span() => "V"}
+    } else {
+        quote_spanned! {out_ty.span() => &<#out_ty as ::rosttasse::prelude::JSignature>::sig()}
+    };
     let get_sig_args = quote! {
         #[allow(unused_mut)]
         let mut sig_args = String::from("(");
@@ -418,6 +439,7 @@ fn prepare_method(method: &BindFieldMethod) -> MethodInfo {
         def_args,
         extern_name,
         get_sig_args,
+        is_contructor,
         ret,
     }
 }

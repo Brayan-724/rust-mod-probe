@@ -1,5 +1,5 @@
 use crate::java::mc::registry::RegistryKey;
-use crate::{RustBridge, SerjioItem};
+use crate::RustBridge;
 use jni::JNIEnv;
 use rosttasse::prelude::Function;
 use rosttasse::JSignature;
@@ -27,12 +27,12 @@ rosttasse::bind! {
 }
 
 impl Items {
-    pub fn register<'local>(
+    pub fn register<'local, ITEM: JSignature>(
         key: RegistryKey,
         settings: ItemSettings,
         env: &mut JNIEnv<'local>,
     ) -> Item {
-        let factory = RustBridge::item_factory(SerjioItem::class(env), env);
+        let factory = RustBridge::item_factory(ITEM::class(env), env);
 
         Self::register_raw(key, factory, settings, env)
     }

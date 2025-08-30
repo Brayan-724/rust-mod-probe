@@ -1,24 +1,21 @@
 mod java;
-// mod mc;
 
-// use java::mc::entity::passive::WolfEntity;
-// use java::mc::entity::player::PlayerEntity;
-// use java::mc::entity::EntityType;
-// use java::mc::text::Text;
-// use java::mc::util::{ActionResult, Hand};
-// use java::mc::world::World;
 use java::{mc::item::Item, Event};
-// use jni::JNIEnv;
-
-// use jni::objects::JClass;
-// use mc::entity::passive::WolfEntity;
-// use mc::entity::player::PlayerEntity;
-// use mc::entity::EntityType;
-// use mc::util::{ActionResult, Hand};
-// use mc::world::World;
-
-// use rosttasse::conversion::IntoJValue;
+use jni::objects::{JClass as JNIClass, JObject as JNIObject};
+use jni::JNIEnv;
+use rosttasse::prelude::IntoJValue as _;
 use rosttasse::primitives::{Function, JClass};
+use rosttasse::JavaClass as _;
+
+use crate::java::mc::entity::passive::WolfEntity;
+use crate::java::mc::entity::player::PlayerEntity;
+use crate::java::mc::entity::EntityType;
+use crate::java::mc::item::{ItemGroups, ItemSettings, Items};
+use crate::java::mc::registry::RegistryKeys;
+use crate::java::mc::text::Text;
+use crate::java::mc::util::{ActionResult, Hand};
+use crate::java::mc::world::World;
+use crate::java::ItemGroupEvents;
 
 const MOD_ID: &str = "apikaprobe";
 
@@ -72,51 +69,51 @@ rosttasse::bind! {
 //     }
 // }
 
-// #[no_mangle]
-// pub extern "system" fn Java_me_apika_apikaprobe_RustBridge_main<'local>(
-//     mut env: JNIEnv<'local>,
-//     _class: JClass<'local>,
-// ) {
-//     let env = &mut env;
-//
-//     let settings = ItemSettings::new(env);
-//     let item = register_item(env, "serjio", RegistryKeys::ITEM, settings);
-//
-//     ItemGroupEvents::modify_entries_event(env, ItemGroups::REDSTONE).register(env, item);
-// }
-//
-// #[no_mangle]
-// pub extern "system" fn Java_me_apika_apikaprobe_SerjioItem_use<'local>(
-//     mut env: JNIEnv<'local>,
-//     _class: JClass<'local>,
-//     world: JObject<'local>,
-//     user: JObject<'local>,
-//     hand: JObject<'local>,
-// ) -> JObject<'local> {
-//     let env = &mut env;
-//
-//     let world = World::from_instance(world.into());
-//     let user = PlayerEntity::from_instance(user.into());
-//     let _hand = Hand::from_instance(hand.into());
-//
-//     // Ensure we don't spawn the lightning only on the client.
-//     // This is to prevent desync.
-//     if world.is_client.get(env) {
-//         return ActionResult::PASS.get_raw(env).l().unwrap();
-//     }
-//
-//     let player_pos = user.get_block_pos(env).to_center_pos(env);
-//     let pos = user
-//         .get_rotation_vector(env)
-//         .scale(env, 5.0)
-//         .add_vec(env, player_pos);
-//
-//     let wolf = WolfEntity::new(env, EntityType::WOLF, world);
-//
-//     wolf.set_position(env, pos);
-//     let name = Text::of(env, "Serjio".to_string());
-//     wolf.set_custom_name(env, name);
-//     world.spawn_entity(env, wolf.cast());
-//
-//     ActionResult::SUCCESS.into_jvalue(env).l().unwrap()
-// }
+#[no_mangle]
+pub extern "system" fn Java_me_apika_apikaprobe_RustBridge_main<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JNIClass<'local>,
+) {
+    let env = &mut env;
+
+    let item =
+        Items::register::<SerjioItem>(RegistryKeys::ITEM.get(env), ItemSettings::default(env), env);
+
+    ItemGroupEvents::modify_entries_event(ItemGroups::REDSTONE, env).register(item, env);
+}
+
+#[no_mangle]
+pub extern "system" fn Java_me_apika_apikaprobe_SerjioItem_use<'local>(
+    mut env: JNIEnv<'local>,
+    _class: JNIClass<'local>,
+    world: JNIObject<'local>,
+    user: JNIObject<'local>,
+    hand: JNIObject<'local>,
+) -> JNIObject<'local> {
+    let env = &mut env;
+
+    let world = World::from_raw(world.into());
+    let user = PlayerEntity::from_raw(user.into());
+    let _hand = Hand::from_raw(hand.into());
+
+    // Ensure we don't spawn the lightning only on the client.
+    // This is to prevent desync.
+    if world.is_client.get(env) {
+        return ActionResult::PASS.get_raw(env).l().unwrap();
+    }
+
+    let player_pos = user.get_block_pos(env).to_center_pos(env);
+    let pos = user
+        .get_rotation_vector(env)
+        .scale(5.0, env)
+        .add_vec(player_pos, env);
+
+    let wolf = WolfEntity::new(EntityType::WOLF, world, env);
+
+    wolf.set_position(pos, env);
+    let name = Text::of("Serjio".to_string(), env);
+    wolf.set_custom_name(name, env);
+    world.spawn_entity(wolf.cast(), env);
+
+    ActionResult::SUCCESS.into_jvalue(env).l().unwrap()
+}
