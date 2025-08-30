@@ -1,7 +1,7 @@
 use crate::registry::RegistryKey;
 use crate::RustBridge;
 use rosttasse::jni::JNIEnv;
-use rosttasse::prelude::Function;
+use rosttasse::prelude::{Function, Resolve};
 use rosttasse::JSignature;
 
 rosttasse::bind! {
@@ -28,12 +28,12 @@ rosttasse::bind! {
 
 impl Items {
     pub fn register<'local, ITEM: JSignature>(
-        key: RegistryKey,
+        key: impl Resolve<RegistryKey>,
         settings: ItemSettings,
         env: &mut JNIEnv<'local>,
     ) -> Item {
         let factory = RustBridge::item_factory(ITEM::class(env), env);
 
-        Self::register_raw(key, factory, settings, env)
+        Self::register_raw(key.resolve(env), factory, settings, env)
     }
 }

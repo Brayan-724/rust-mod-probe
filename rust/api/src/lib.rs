@@ -6,7 +6,10 @@ pub mod primitives;
 
 use class::Instance;
 use conversion::{FromJValue, IntoJValue};
-use jni::JNIEnv;
+pub use jni::{
+    objects::{JClass as JNIClass, JObject as JNIObject},
+    JNIEnv,
+};
 pub use rosttasse_macros::*;
 
 pub trait JSignature {

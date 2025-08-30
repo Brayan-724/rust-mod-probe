@@ -111,6 +111,18 @@ fn bind_def_enum(
         }
     };
 
+    let resolve = if !is_itself {
+        quote! {
+            impl ::rosttasse::prelude::Resolve<#enum_of> for #class {
+                fn resolve<'local>(self, env: &mut ::rosttasse::prelude::JNIEnv<'local>) -> #enum_of {
+                    self.get(env)
+                }
+            }
+        }
+    } else {
+        quote!()
+    };
+
     quote! {
         #[allow(dead_code)]
         pub enum #class {
@@ -131,6 +143,8 @@ fn bind_def_enum(
                 // <::rosttasse::prelude::Instance as ::rosttasse::prelude::FromJValue>::from_jvalue(value).into()
             }
         }
+
+        #resolve
 
         impl #class {
             #[allow(dead_code)]

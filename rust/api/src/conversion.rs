@@ -16,3 +16,13 @@ impl IntoJValue for JObject<'_> {
 pub trait FromJValue {
     fn from_jvalue<'local>(value: JValueOwned<'local>) -> Self;
 }
+
+pub trait Resolve<T> {
+    fn resolve<'local>(self, env: &mut JNIEnv<'local>) -> T;
+}
+
+impl<T> Resolve<T> for T {
+    fn resolve<'local>(self, _: &mut JNIEnv<'local>) -> T {
+        self
+    }
+}
