@@ -464,6 +464,14 @@ fn generate_instance_field_common(
     from_raw: proc_macro2::TokenStream,
 ) -> proc_macro2::TokenStream {
     quote_spanned! { self_ident.span() =>
+        impl From<::rosttasse::prelude::JNIObject<'_>> for #struct_name {
+            fn from(value: ::rosttasse::prelude::JNIObject<'_>) -> Self {
+                <#struct_name as ::rosttasse::prelude::JavaClass>::from_raw(
+                    <::rosttasse::prelude::Instance as From<::rosttasse::prelude::JNIObject<'_>>>::from(value)
+                )
+            }
+        }
+
         impl From<::rosttasse::prelude::Instance> for #struct_name {
             fn from(value: ::rosttasse::prelude::Instance) -> Self {
                 <#struct_name as ::rosttasse::prelude::JavaClass>::from_raw(value)

@@ -1,3 +1,5 @@
+#![feature(associated_type_defaults)]
+
 pub extern crate jni;
 
 pub mod class;
@@ -39,6 +41,8 @@ pub trait JSignature {
 pub trait JavaClass: JSignature + IntoJValue + FromJValue {
     fn get_raw(&self) -> Instance;
     fn from_raw(raw: Instance) -> Self;
+
+    // fn from_jni<'local>(value: Self::JniType<'local>) -> Self;
 }
 
 pub mod prelude {

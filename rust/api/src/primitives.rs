@@ -1,5 +1,7 @@
 use std::ops;
 
+use jni::objects::JObject;
+use jni::sys::{jbyte, jchar, jdouble, jfloat, jint, jlong, jshort};
 use jni::{
     objects::{JClass as JniJClass, JValueOwned},
     JNIEnv,
@@ -11,8 +13,24 @@ use crate::{
     JSignature,
 };
 
+pub trait AsJni<'local> {
+    fn as_jni(value: JValueOwned<'local>) -> Self;
+}
+
+impl<'local> AsJni<'local> for JObject<'local> {
+    fn as_jni(value: JValueOwned<'local>) -> Self {
+        value.l().unwrap()
+    }
+}
+
+impl<'local> AsJni<'local> for JniJClass<'local> {
+    fn as_jni(value: JValueOwned<'local>) -> Self {
+        value.l().unwrap().into()
+    }
+}
+
 macro_rules! primitive {
-    ($class:ident: $fn:ident, $sig:literal, $sig_type:literal, $type:ident) => {
+    ($class:ident: $fn:ident, $sig:literal, $sig_type:literal, $type:ident, $jni_type:ident) => {
         impl $crate::JSignature for $class {
             const CLASS: &'static str = $sig_type;
 
@@ -22,6 +40,8 @@ macro_rules! primitive {
         }
 
         impl $crate::conversion::IntoJValue for $class {
+            type JniType<'local> = $jni_type;
+
             fn into_jvalue<'local>(
                 self,
                 _: &mut ::jni::JNIEnv<'local>,
@@ -35,25 +55,31 @@ macro_rules! primitive {
                 value.$fn().unwrap()
             }
         }
+
+        impl<'local> AsJni<'local> for $jni_type {
+            fn as_jni(value: JValueOwned<'local>) -> Self {
+                value.$fn().unwrap()
+            }
+        }
     };
 }
 
 // Z 	boolean
-primitive!(bool: z, "Z", "java/lang/Boolean", Bool);
+primitive!(bool: z, "Z", "java/lang/Boolean", Bool, bool);
 // B 	byte
-primitive!(i8: b, "B", "java/lang/Byte", Byte);
+primitive!(i8: b, "B", "java/lang/Byte", Byte, jbyte);
 // C 	char
-primitive!(u16: c, "C", "java/lang/Character", Char);
+primitive!(u16: c, "C", "java/lang/Character", Char, jchar);
 // S 	short
-primitive!(i16: s, "S", "java/lang/Short", Short);
+primitive!(i16: s, "S", "java/lang/Short", Short, jshort);
 // I 	int
-primitive!(i32: i, "I", "java/lang/Integer", Int);
+primitive!(i32: i, "I", "java/lang/Integer", Int, jint);
 // J 	long
-primitive!(i64: j, "J", "java/lang/Long", Long);
+primitive!(i64: j, "J", "java/lang/Long", Long, jlong);
 // F 	float
-primitive!(f32: f, "F", "java/lang/Float", Float);
+primitive!(f32: f, "F", "java/lang/Float", Float, jfloat);
 // D 	double
-primitive!(f64: d, "D", "java/lang/Double", Double);
+primitive!(f64: d, "D", "java/lang/Double", Double, jdouble);
 
 // Void
 
@@ -221,6 +247,8 @@ impl JClass {
 }
 
 impl IntoJValue for JClass {
+    type JniType<'local> = JniJClass<'local>;
+
     fn into_jvalue<'local>(self, env: &mut JNIEnv<'local>) -> JValueOwned<'local> {
         self.0.into_jvalue(env)
     }

@@ -4,6 +4,7 @@
 extern crate proc_macro;
 
 mod bind;
+mod export;
 mod syn_ext;
 mod utils;
 
@@ -12,6 +13,14 @@ use quote::quote;
 #[proc_macro]
 pub fn bind(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     bind::bind(input)
+}
+
+#[proc_macro_attribute]
+pub fn export(
+    input: proc_macro::TokenStream,
+    body: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    export::export(input, body)
 }
 
 #[proc_macro]

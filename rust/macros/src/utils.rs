@@ -1,5 +1,3 @@
-#![expect(dead_code, reason = "meanwhile bind is stable")]
-
 use proc_macro2::Span;
 use quote::ToTokens as _;
 use syn::spanned::Spanned as _;

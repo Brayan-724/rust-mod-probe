@@ -11,20 +11,15 @@ rosttasse::bind! {
     impl SerjioItem {}
 }
 
-rosttasse::register_item! {SerjioItem =>
-    key = RegistryKeys::ITEM,
-    settings = ItemSettings::default,
-    groups = [ItemGroups::REDSTONE]
-}
+// rosttasse::register_item! {SerjioItem =>
+//     key = RegistryKeys::ITEM,
+//     settings = ItemSettings::default,
+//     groups = [ItemGroups::REDSTONE]
+// }
 
-#[rosttasse::export]
+#[rosttasse::export(me.apika.apikaprobe)]
 impl SerjioItem {
-    pub fn r#use(
-        self,
-        world: World,
-        user: PlayerEntity,
-        _hand: Hand,
-    ) -> ActionResult {
+    pub fn r#use(self, world: World, user: PlayerEntity, _hand: Hand) -> ActionResult {
         // Ensure we don't spawn the wolf only on the client.
         // This is to prevent desync.
         if world.is_client.get(env) {
