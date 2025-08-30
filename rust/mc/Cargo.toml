@@ -1,11 +1,7 @@
 [package]
-name = "rust-mod"
+name = "rosttasse-mc"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
-crate-type = ["cdylib"]
-
 [dependencies]
 rosttasse = { path = "../api/" }
-rosttasse-mc = { path = "../mc/" }

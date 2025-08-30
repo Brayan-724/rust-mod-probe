@@ -1,4 +1,4 @@
-use crate::java::mc::entity::Entity;
+use crate::entity::Entity;
 
 rosttasse::bind! {
     use net.minecraft.world;

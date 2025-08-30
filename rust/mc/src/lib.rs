@@ -1,8 +1,24 @@
-use crate::java::mc::item::{Item, ItemGroups};
-use crate::RustBridge;
-use jni::JNIEnv;
+use crate::item::{Item, ItemGroups};
+use rosttasse::jni::JNIEnv;
+use rosttasse::prelude::{Function, JClass};
 
-pub mod mc;
+pub mod entity;
+pub mod item;
+pub mod registry;
+pub mod text;
+pub mod util;
+pub mod world;
+
+rosttasse::bind! {
+    use me.apika.apikaprobe;
+
+    impl RustBridge {
+        static SERJIO: Item;
+
+        fn register_group_event(event: Event, item: Item);
+        fn item_factory(item: JClass) -> Function;
+    }
+}
 
 rosttasse::bind! {
     use net.fabricmc.api.event;

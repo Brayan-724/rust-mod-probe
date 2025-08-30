@@ -1,6 +1,6 @@
-use crate::java::mc::registry::RegistryKey;
+use crate::registry::RegistryKey;
 use crate::RustBridge;
-use jni::JNIEnv;
+use rosttasse::jni::JNIEnv;
 use rosttasse::prelude::Function;
 use rosttasse::JSignature;
 

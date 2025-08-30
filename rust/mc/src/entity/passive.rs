@@ -1,7 +1,7 @@
-use crate::java::mc::entity::EntityType;
-use crate::java::mc::text::Text;
-use crate::java::mc::util::math::Vec3d;
-use crate::java::mc::world::World;
+use crate::entity::EntityType;
+use crate::text::Text;
+use crate::util::math::Vec3d;
+use crate::world::World;
 
 rosttasse::bind! {
     use net.minecraft.entity.passive;

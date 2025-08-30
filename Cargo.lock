@@ -112,6 +112,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "rosttasse-mc"
+version = "0.1.0"
+dependencies = [
+ "rosttasse",
+]
+
+[[package]]
 name = "rosttasse_macros"
 version = "0.1.0"
 dependencies = [
@@ -126,8 +133,8 @@ dependencies = [
 name = "rust-mod"
 version = "0.1.0"
 dependencies = [
- "jni",
  "rosttasse",
+ "rosttasse-mc",
 ]
 
 [[package]]

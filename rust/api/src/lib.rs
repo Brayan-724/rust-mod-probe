@@ -1,3 +1,5 @@
+pub extern crate jni;
+
 pub mod class;
 pub mod conversion;
 pub mod primitives;

@@ -1,4 +1,4 @@
-use crate::java::mc::util::math::{BlockPos, Direction, Vec3d};
+use crate::util::math::{BlockPos, Direction, Vec3d};
 
 rosttasse::bind! {
     use net.minecraft.entity.player;

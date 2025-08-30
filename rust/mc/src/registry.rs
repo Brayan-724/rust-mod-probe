@@ -1,4 +1,4 @@
-use crate::java::mc::util::Identifier;
+use crate::util::Identifier;
 
 rosttasse::bind! {
     use net.minecraft.registry;

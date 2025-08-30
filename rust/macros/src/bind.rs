@@ -120,13 +120,13 @@ fn bind_def_enum(
         #signature
 
         impl ::rosttasse::prelude::IntoJValue for #class {
-            fn into_jvalue<'local>(self, env: &mut ::jni::JNIEnv<'local>) -> ::jni::objects::JValueOwned<'local> {
+            fn into_jvalue<'local>(self, env: &mut ::rosttasse::jni::JNIEnv<'local>) -> ::rosttasse::jni::objects::JValueOwned<'local> {
                 self.get_raw(env)
             }
         }
 
         impl ::rosttasse::prelude::FromJValue for #class {
-            fn from_jvalue<'local>(value: ::jni::objects::JValueOwned<'local>) -> Self {
+            fn from_jvalue<'local>(value: ::rosttasse::jni::objects::JValueOwned<'local>) -> Self {
                 todo!(concat!("impl FromJValue for ", stringify!(#class)))
                 // <::rosttasse::prelude::Instance as ::rosttasse::prelude::FromJValue>::from_jvalue(value).into()
             }
@@ -134,7 +134,7 @@ fn bind_def_enum(
 
         impl #class {
             #[allow(dead_code)]
-            pub fn get_raw<'local>(&self, env: &mut ::jni::JNIEnv<'local>) -> ::jni::objects::JValueOwned<'local> {
+            pub fn get_raw<'local>(&self, env: &mut ::rosttasse::jni::JNIEnv<'local>) -> ::rosttasse::jni::objects::JValueOwned<'local> {
                 let class = env
                     .find_class(#sig)
                     .expect(concat!("Cannot get ", stringify!(#class), " class"));
@@ -143,7 +143,7 @@ fn bind_def_enum(
             }
 
             #[allow(dead_code)]
-            pub fn get<'local>(&self, env: &mut ::jni::JNIEnv<'local>) -> #enum_of {
+            pub fn get<'local>(&self, env: &mut ::rosttasse::jni::JNIEnv<'local>) -> #enum_of {
                 <#enum_of as ::rosttasse::prelude::FromJValue>::from_jvalue(
                     self.get_raw(env)
                 )
@@ -216,7 +216,7 @@ fn bind_def_class(
 
     let constructor = quote_spanned! {class.span() =>
         #[allow(dead_code)]
-        pub fn default<'local>(env: &mut ::jni::JNIEnv<'local>) -> Self {
+        pub fn default<'local>(env: &mut ::rosttasse::jni::JNIEnv<'local>) -> Self {
             let instance: ::rosttasse::prelude::Instance = env
                 .new_object(<Self as ::rosttasse::prelude::JSignature>::CLASS, "()V", &[])
                 .unwrap()
@@ -285,7 +285,7 @@ fn bind_fn(method: BindFieldMethod, method_info: MethodInfo) -> proc_macro2::Tok
         pub fn #name<'local>(&self, #decl_params) #ret_ty {
             #get_sig_args
 
-            let obj: ::jni::objects::JObject = <Self as ::rosttasse::prelude::JavaClass>::get_raw(self).into();
+            let obj: ::rosttasse::jni::objects::JObject = <Self as ::rosttasse::prelude::JavaClass>::get_raw(self).into();
             let _ret = env
                 .call_method(obj, #extern_name, sig_args, #def_args)
                 .unwrap();
@@ -381,7 +381,7 @@ fn prepare_method(method: &BindFieldMethod) -> MethodInfo {
         let ty = &param.2;
         quote! {#name: #ty}
     });
-    let decl_params = quote!(#(#decl_params,)* env: &mut ::jni::JNIEnv<'local>);
+    let decl_params = quote!(#(#decl_params,)* env: &mut ::rosttasse::jni::JNIEnv<'local>);
 
     let (decl_args, def_args) = method
         .params
@@ -471,13 +471,13 @@ fn generate_instance_field_common(
         }
 
         impl ::rosttasse::prelude::IntoJValue for #struct_name {
-            fn into_jvalue<'local>(self, env: &mut ::jni::JNIEnv<'local>) -> ::jni::objects::JValueOwned<'local> {
+            fn into_jvalue<'local>(self, env: &mut ::rosttasse::jni::JNIEnv<'local>) -> ::rosttasse::jni::objects::JValueOwned<'local> {
                 #self_ident.into_jvalue(env)
             }
         }
 
         impl ::rosttasse::prelude::FromJValue for #struct_name {
-            fn from_jvalue<'local>(value: ::jni::objects::JValueOwned<'local>) -> Self {
+            fn from_jvalue<'local>(value: ::rosttasse::jni::objects::JValueOwned<'local>) -> Self {
                 <::rosttasse::prelude::Instance as ::rosttasse::prelude::FromJValue>::from_jvalue(value).into()
             }
         }

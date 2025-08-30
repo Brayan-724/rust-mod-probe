@@ -2,5 +2,6 @@
 members = [
   "rust/api",
   "rust/macros",
+  "rust/mc",
   "rust/mod",
 ]
