@@ -1,8 +1,8 @@
 use crate::java::mc::registry::RegistryKey;
+use crate::{RustBridge, SerjioItem};
 use jni::JNIEnv;
 use rosttasse::prelude::Function;
-
-use crate::java::SerjioItem;
+use rosttasse::JSignature;
 
 rosttasse::bind! {
     use net.minecraft.item;
@@ -32,11 +32,7 @@ impl Items {
         settings: ItemSettings,
         env: &mut JNIEnv<'local>,
     ) -> Item {
-        let factory = {
-            let item = SerjioItem::class(env);
-
-            RustBridge::item_factory(env, item)
-        };
+        let factory = RustBridge::item_factory(SerjioItem::class(env), env);
 
         Self::register_raw(key, factory, settings, env)
     }

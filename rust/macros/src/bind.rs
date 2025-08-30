@@ -14,7 +14,7 @@ use crate::bind::parse::{
     BindDefinition, BindField, BindFieldMethod, BindFieldProperty, BindInput, BindPackage,
     BindVariant,
 };
-use crate::java_class::get_attribute;
+use crate::utils::get_attribute;
 
 pub fn bind(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let BindInput { package, defs } = syn::parse_macro_input!(input as BindInput);
@@ -195,7 +195,9 @@ fn bind_def_class(
         .map(|prop| {
             let name = prop.ident;
             let ty = prop.ty;
-            quote_spanned! {name.span() => pub const #name: ::rosttasse::prelude::Field<#ty> }
+            quote_spanned! {name.span() =>
+                pub const #name: ::rosttasse::prelude::StaticField<#class, #ty> = ::rosttasse::prelude::StaticField::new(stringify!(#name));
+            }
         })
         .collect_vec();
 
@@ -226,7 +228,7 @@ fn bind_def_class(
         })
         .collect::<Vec<_>>();
 
-    let instance_impl = crate::java_class::struct_::generate_instance_field_common(
+    let instance_impl = generate_instance_field_common(
         &class,
         quote_spanned! {class.span() => self.raw},
         quote_spanned! {class.span() => Self {
@@ -417,5 +419,62 @@ fn prepare_method(method: &BindFieldMethod) -> MethodInfo {
         extern_name,
         get_sig_args,
         ret,
+    }
+}
+
+fn generate_instance_field_common(
+    struct_name: &Ident,
+    self_ident: proc_macro2::TokenStream,
+    from_raw: proc_macro2::TokenStream,
+) -> proc_macro2::TokenStream {
+    quote_spanned! { self_ident.span() =>
+        impl From<::rosttasse::prelude::Instance> for #struct_name {
+            fn from(value: ::rosttasse::prelude::Instance) -> Self {
+                <#struct_name as ::rosttasse::prelude::JavaClass>::from_raw(value)
+            }
+        }
+
+        impl Into<::rosttasse::prelude::Instance> for #struct_name {
+            fn into(self) -> ::rosttasse::prelude::Instance {
+                #self_ident
+            }
+        }
+
+        impl ::core::ops::Deref for #struct_name {
+            type Target = ::rosttasse::prelude::Instance;
+
+            fn deref(&self) -> &Self::Target {
+                &#self_ident
+            }
+        }
+
+        impl ::rosttasse::prelude::IntoJValue for #struct_name {
+            fn into_jvalue<'local>(self, env: &mut ::jni::JNIEnv<'local>) -> ::jni::objects::JValueOwned<'local> {
+                #self_ident.into_jvalue(env)
+            }
+        }
+
+        impl ::rosttasse::prelude::FromJValue for #struct_name {
+            fn from_jvalue<'local>(value: ::jni::objects::JValueOwned<'local>) -> Self {
+                <::rosttasse::prelude::Instance as ::rosttasse::prelude::FromJValue>::from_jvalue(value).into()
+            }
+        }
+
+        impl ::rosttasse::prelude::JavaClass for #struct_name {
+            fn get_raw(&self) -> ::rosttasse::prelude::Instance {
+                #self_ident.clone()
+            }
+
+            fn from_raw(raw: ::rosttasse::prelude::Instance) -> Self {
+                #from_raw
+            }
+        }
+
+        impl #struct_name {
+            #[allow(dead_code)]
+            pub fn cast_unchecked<T: From<::rosttasse::prelude::Instance>>(&self) -> T {
+                T::from(#self_ident)
+            }
+        }
     }
 }

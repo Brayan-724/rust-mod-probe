@@ -1,4 +1,5 @@
 use crate::java::mc::item::{Item, ItemGroups};
+use crate::RustBridge;
 use jni::JNIEnv;
 
 pub mod mc;
@@ -22,7 +23,7 @@ rosttasse::bind! {
 }
 
 impl Event {
-    pub fn register<'local>(self, env: &mut JNIEnv<'local>, item: Item) {
-        RustBridge::register_group_event(env, self, item)
+    pub fn register<'local>(self, item: Item, env: &mut JNIEnv<'local>) {
+        RustBridge::register_group_event(self, item, env)
     }
 }

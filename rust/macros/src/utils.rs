@@ -1,14 +1,9 @@
-// mod enum_;
-// mod sig;
-pub mod struct_;
+#![expect(dead_code, reason = "meanwhile bind is stable")]
 
 use proc_macro2::Span;
-use quote::ToTokens;
-use syn::spanned::Spanned;
+use quote::ToTokens as _;
+use syn::spanned::Spanned as _;
 use syn::{Attribute, Error, Expr, ExprLit, Lit, LitStr, Meta, MetaList, MetaNameValue};
-
-// pub use enum_::main_enum;
-// pub use struct_::main_struct;
 
 pub fn get_string_attr(
     span: Span,

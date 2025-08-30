@@ -4,6 +4,7 @@ pub mod primitives;
 
 use class::Instance;
 use conversion::{FromJValue, IntoJValue};
+use jni::JNIEnv;
 pub use rosttasse_macros::*;
 
 pub trait JSignature {
@@ -22,6 +23,11 @@ pub trait JSignature {
         out.push(';');
 
         out
+    }
+
+    #[inline(always)]
+    fn class<'local>(env: &mut JNIEnv<'local>) -> primitives::JClass {
+        env.find_class(Self::CLASS).unwrap().into()
     }
 }
 

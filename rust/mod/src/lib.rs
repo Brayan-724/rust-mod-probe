@@ -7,13 +7,10 @@ mod java;
 // use java::mc::text::Text;
 // use java::mc::util::{ActionResult, Hand};
 // use java::mc::world::World;
-// use java::{
-//     Identifier, Item, ItemGroupEvents, ItemGroups, ItemSettings, Items, RegistryKey, RegistryKeys,
-//     RustBridge,
-// };
+use java::{mc::item::Item, Event};
 // use jni::JNIEnv;
 
-// use jni::objects::{JClass, JObject};
+// use jni::objects::JClass;
 // use mc::entity::passive::WolfEntity;
 // use mc::entity::player::PlayerEntity;
 // use mc::entity::EntityType;
@@ -21,7 +18,7 @@ mod java;
 // use mc::world::World;
 
 // use rosttasse::conversion::IntoJValue;
-// use rosttasse::JSignature;
+use rosttasse::primitives::{Function, JClass};
 
 const MOD_ID: &str = "apikaprobe";
 
@@ -37,33 +34,6 @@ rosttasse::bind! {
         fn item_factory(item: JClass) -> Function;
     }
 }
-
-// fn register_item<'local>(
-//     env: &mut JNIEnv<'local>,
-//     id: &str,
-//     kind: RegistryKeys,
-//     settings: ItemSettings,
-// ) -> Item {
-//     let id = id.to_owned();
-//     let mod_id = MOD_ID.to_owned();
-//
-//     let identifier = Identifier::of(env, mod_id, id);
-//     let registry_key = RegistryKey::of(env, kind, identifier);
-//
-//     let value = Items::register(env, registry_key, settings);
-//
-//     let class = RustBridge::class(env).into_class();
-//     let key = env
-//         .get_static_field_id(&class, "SERJIO", Item::sig())
-//         .unwrap();
-//
-//     {
-//         let value = value.clone().into_jvalue(env);
-//         env.set_static_field(class, key, value.borrow()).unwrap();
-//     }
-//
-//     value
-// }
 
 // #[rosttasse::bridge("me.apika.apikaprobe", entry, template_file = "./bridge.j")]
 // mod RustBridge {
@@ -100,23 +70,6 @@ rosttasse::bind! {
 //             ItemGroupEvents::modify_entries_event(ItemGroups::REDSTONE, env).register(env, item);
 //         }
 //     }
-// }
-
-// #[derive(JavaClass)]
-// #[package(me.apika.apikaprobe)]
-// #[probe::class("me.apika.apikaprobe")]
-// pub struct RustBridge {
-//     #[static]
-//     pub SERJIO: Item,
-// }
-
-// #[probe::import]
-// impl RustBridge {
-//     // Automatic casing
-//     pub fn register_group_event(event: Event, item: Item);
-//
-//     // Manual casing
-//     pub extern "itemFactory" fn item_factory(item: JClass) -> Function;
 // }
 
 // #[no_mangle]
