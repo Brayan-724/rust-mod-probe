@@ -1,4 +1,4 @@
-// mod java;
+mod java;
 // mod mc;
 
 // use java::mc::entity::passive::WolfEntity;
@@ -52,18 +52,18 @@ const MOD_ID: &str = "apikaprobe";
 //     value
 // }
 
-#[rosttasse::bridge("me.apika.apikaprobe", entry, template_file = "./bridge.j")]
-mod RustBridge {
-    struct Class;
-
-    impl Class {
-        #[export]
-        extern fn main() { 
-            println!("Hello From Rust!")
-            panic!()
-        }
-    }
-}
+// #[rosttasse::bridge("me.apika.apikaprobe", entry, template_file = "./bridge.j")]
+// mod RustBridge {
+//     struct Class;
+//
+//     impl Class {
+//         #[export]
+//         extern "C" fn main() {
+//             println!("Hello From Rust!");
+//             panic!()
+//         }
+//     }
+// }
 
 // #[probe::exports]
 // pub mod bindings {

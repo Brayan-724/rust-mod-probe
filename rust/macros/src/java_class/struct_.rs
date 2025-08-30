@@ -87,11 +87,6 @@ pub fn generate_instance_field_struct(
 
     let instance_field_ident = instance_field.ident.as_ref().unwrap();
 
-    let out = generate_instance_field_common(
-        struct_name,
-        quote_spanned! {instance_field_ident.span() => self.#instance_field_ident},
-    )?;
-
     let other_fields = fields
         .named
         .iter()
@@ -107,19 +102,16 @@ pub fn generate_instance_field_struct(
         })
         .collect::<Result<Vec<_>, Error>>()?;
 
-    Ok(quote_spanned! { instance_field_ident.span() =>
-        #out
+    let out = generate_instance_field_common(
+        struct_name,
+        quote_spanned! {instance_field_ident.span() => self.#instance_field_ident},
+        quote_spanned! {instance_field_ident.span() => Self {
+            #instance_field_ident: raw,
+            #(#other_fields),*
+        }},
+    );
 
-        impl #struct_name {
-            #[allow(dead_code)]
-            pub fn from_instance(instance: ::probe::class::Instance) -> #struct_name {
-                Self {
-                    #instance_field_ident: instance,
-                    #(#other_fields),*
-                }
-            }
-        }
-    })
+    Ok(out)
 }
 
 fn generate_instance_field_tuple(
@@ -167,70 +159,67 @@ fn generate_instance_field_tuple(
     let out = generate_instance_field_common(
         struct_name,
         quote_spanned! {instance_field.span() => self.0},
-    )?;
+        quote_spanned! {instance_field.span() => Self(raw)},
+    );
 
-    Ok(quote_spanned! { instance_field.span() =>
-        #out
-
-        impl #struct_name {
-            #[allow(dead_code)]
-            pub fn from_instance(instance: ::probe::class::Instance) -> #struct_name {
-                Self(instance)
-            }
-        }
-    })
+    Ok(out)
 }
 
 pub fn generate_instance_field_common(
     struct_name: &Ident,
     self_ident: TokenStream,
-) -> Result<TokenStream, syn::Error> {
-    Ok(quote_spanned! { self_ident.span() =>
-        impl From<::probe::class::Instance> for #struct_name {
-            fn from(value: ::probe::class::Instance) -> Self {
-                #struct_name::from_instance(value)
+    from_raw: TokenStream,
+) -> TokenStream {
+    quote_spanned! { self_ident.span() =>
+        impl From<::rosttasse::prelude::Instance> for #struct_name {
+            fn from(value: ::rosttasse::prelude::Instance) -> Self {
+                <#struct_name as ::rosttasse::prelude::JavaClass>::from_raw(value)
             }
         }
 
-        impl Into<::probe::class::Instance> for #struct_name {
-            fn into(self) -> ::probe::class::Instance {
+        impl Into<::rosttasse::prelude::Instance> for #struct_name {
+            fn into(self) -> ::rosttasse::prelude::Instance {
                 #self_ident
             }
         }
 
         impl ::core::ops::Deref for #struct_name {
-            type Target = ::probe::class::Instance;
+            type Target = ::rosttasse::prelude::Instance;
 
             fn deref(&self) -> &Self::Target {
                 &#self_ident
             }
         }
 
-        impl ::probe::conversion::IntoJValue for #struct_name {
+        impl ::rosttasse::prelude::IntoJValue for #struct_name {
             fn into_jvalue<'local>(self, env: &mut ::jni::JNIEnv<'local>) -> ::jni::objects::JValueOwned<'local> {
                 #self_ident.into_jvalue(env)
             }
         }
 
-        impl ::probe::conversion::FromJValue for #struct_name {
+        impl ::rosttasse::prelude::FromJValue for #struct_name {
             fn from_jvalue<'local>(value: ::jni::objects::JValueOwned<'local>) -> Self {
-                <::probe::class::Instance as ::probe::conversion::FromJValue>::from_jvalue(value).into()
+                <::rosttasse::prelude::Instance as ::rosttasse::prelude::FromJValue>::from_jvalue(value).into()
             }
         }
 
-        impl ::probe::JavaClass for #struct_name {
-            fn get_raw(&self) -> ::probe::class::Instance {
+        impl ::rosttasse::prelude::JavaClass for #struct_name {
+            fn get_raw(&self) -> ::rosttasse::prelude::Instance {
                 #self_ident.clone()
+            }
+
+            fn from_raw(raw: ::rosttasse::prelude::Instance) -> Self {
+                #from_raw
             }
         }
 
         impl #struct_name {
             #[allow(dead_code)]
-            pub fn cast_unchecked<T: From<::probe::class::Instance>>(&self) -> T {
+            pub fn cast_unchecked<T: From<::rosttasse::prelude::Instance>>(&self) -> T {
                 T::from(#self_ident)
             }
         }
-    })
+    }
 }
 
 fn get_instance_field<'a>(iter: impl Iterator<Item = &'a Field>) -> Option<&'a Field> {

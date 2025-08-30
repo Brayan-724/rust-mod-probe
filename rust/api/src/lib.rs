@@ -27,4 +27,12 @@ pub trait JSignature {
 
 pub trait JavaClass: JSignature + IntoJValue + FromJValue {
     fn get_raw(&self) -> Instance;
+    fn from_raw(raw: Instance) -> Self;
+}
+
+pub mod prelude {
+    pub use crate::class::*;
+    pub use crate::conversion::*;
+    pub use crate::primitives::*;
+    pub use crate::*;
 }

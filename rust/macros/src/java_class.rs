@@ -1,9 +1,10 @@
 mod enum_;
 mod sig;
-mod struct_;
+pub mod struct_;
 
 use proc_macro2::Span;
 use quote::ToTokens;
+use syn::spanned::Spanned;
 use syn::{Attribute, Error, Expr, ExprLit, Lit, LitStr, Meta, MetaList, MetaNameValue};
 
 pub use enum_::main_enum;
@@ -24,10 +25,19 @@ pub fn get_string_attr(
             }),
             ..
         }) => Ok(p.value()),
-        _ => Err(Error::new(
-            span,
-            format!("Usage: #[{} = \"OtherName\"]", attr_name.as_ref()),
-        )),
+        _ => {
+            attr.meta
+                .span()
+                .unwrap()
+                .error("expected string attribute")
+                .help(format!("Usage: #[{} = \"value\"]", attr_name.as_ref()))
+                .emit();
+
+            Err(Error::new(
+                span,
+                format!("Usage: #[{} = \"value\"]", attr_name.as_ref()),
+            ))
+        }
     });
 
     if let Some(attr) = attr {

@@ -1,26 +1,35 @@
-// TODO:
-// #![package(net.minecraft.world)]
+use crate::java::mc::entity::Entity;
 
-use probe::{
-    class::{Field, Instance},
-    JavaClass,
-};
+rosttasse::bind! {
+    use net.minecraft.world;
 
-use super::entity::Entity;
+    impl World {
+        let is_client: bool;
 
-#[derive(Clone, Copy, JavaClass)]
-#[package(net.minecraft.world)]
-pub struct World {
-    #[instance]
-    pub raw: Instance,
-
-    pub is_client: Field<bool>,
+        fn spawn_entity(self, entity: Entity) -> bool;
+    }
 }
 
-#[probe::import]
-impl World {
-    pub fn spawn_entity(self, entity: Entity) -> bool;
-}
+// use probe::{
+//     class::{Field, Instance},
+//     JavaClass,
+// };
+//
+// use super::entity::Entity;
+//
+// #[derive(Clone, Copy, JavaClass)]
+// #[package(net.minecraft.world)]
+// pub struct World {
+//     #[instance]
+//     pub raw: Instance,
+//
+//     pub is_client: Field<bool>,
+// }
+//
+// #[probe::import]
+// impl World {
+//     pub fn spawn_entity(self, entity: Entity) -> bool;
+// }
 
 // new_class! {World: "net/minecraft/world/World" {
 //     let is_client: bool = isClient;

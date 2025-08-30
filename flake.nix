@@ -1,11 +1,18 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs";
+    fenix-flake.url = "github:nix-community/fenix";
+    fenix-flake.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = {nixpkgs, ...}: let
+  outputs = {nixpkgs,fenix-flake, ...}: let
     system = "x86_64-linux";
     pkgs = import nixpkgs { inherit system; };
+    fenix = fenix-flake.packages.${system};
+    rust-toolchain = fenix.fromToolchainFile {
+      file = ./rust-toolchain.toml;
+      sha256 = "sha256-VW/GbYzsXuN/9RFwVWtqVIC6w9YwtTuWsCRelwD1Npw=";
+    };
 
     libraries = with pkgs; [
         glfw3-minecraft
@@ -30,6 +37,8 @@
     # nix develop
     devShells.${system}.default = pkgs.mkShell {
       buildInputs = with pkgs; [
+        rust-toolchain
+
         jdk21
         jdt-language-server
 

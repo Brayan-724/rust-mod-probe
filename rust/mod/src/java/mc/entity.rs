@@ -1,17 +1,30 @@
-use probe::{class::Instance, JavaClass};
-
 pub mod passive;
 pub mod player;
 
-#[derive(JavaClass)]
-#[package(net.minecraft.entity)]
-pub struct Entity {
-    #[instance]
-    pub raw: Instance,
-}
+rosttasse::bind! {
+    use net.minecraft.entity;
 
-#[derive(JavaClass)]
-#[package(net.minecraft.entity)]
-pub enum EntityType {
-    WOLF,
+    impl Entity {
+    }
+
+    enum EntityType {
+        WOLF
+    }
 }
+// use probe::{class::Instance, JavaClass};
+//
+// pub mod passive;
+// pub mod player;
+//
+// #[derive(JavaClass)]
+// #[package(net.minecraft.entity)]
+// pub struct Entity {
+//     #[instance]
+//     pub raw: Instance,
+// }
+//
+// #[derive(JavaClass)]
+// #[package(net.minecraft.entity)]
+// pub enum EntityType {
+//     WOLF,
+// }

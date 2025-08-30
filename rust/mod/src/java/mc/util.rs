@@ -1,20 +1,33 @@
-use probe::{class::Instance, JavaClass};
-
 pub mod math;
 
-#[derive(JavaClass)]
-#[package(net.minecraft.util)]
-pub enum ActionResult {
-    #[variant = "Pass"]
-    PASS,
+rosttasse::bind! {
+    use net.minecraft.util;
 
-    #[variant = "Success"]
-    SUCCESS,
+    enum ActionResult {
+        PASS = "Pass",
+        SUCCESS = "Success",
+    }
+
+    impl Hand {}
 }
 
-#[derive(JavaClass)]
-#[package(net.minecraft.util)]
-pub struct Hand {
-    #[instance]
-    pub raw: Instance,
-}
+// use probe::{class::Instance, JavaClass};
+//
+// pub mod math;
+//
+// #[derive(JavaClass)]
+// #[package(net.minecraft.util)]
+// pub enum ActionResult {
+//     #[variant = "Pass"]
+//     PASS,
+//
+//     #[variant = "Success"]
+//     SUCCESS,
+// }
+//
+// #[derive(JavaClass)]
+// #[package(net.minecraft.util)]
+// pub struct Hand {
+//     #[instance]
+//     pub raw: Instance,
+// }
