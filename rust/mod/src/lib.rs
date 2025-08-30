@@ -25,6 +25,19 @@ mod java;
 
 const MOD_ID: &str = "apikaprobe";
 
+rosttasse::bind! {
+    use me.apika.apikaprobe;
+
+    impl SerjioItem {}
+
+    impl RustBridge {
+        static SERJIO: Item;
+
+        fn register_group_event(event: Event, item: Item);
+        fn item_factory(item: JClass) -> Function;
+    }
+}
+
 // fn register_item<'local>(
 //     env: &mut JNIEnv<'local>,
 //     id: &str,

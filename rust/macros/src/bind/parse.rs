@@ -111,16 +111,11 @@ impl Parse for BindDefinition {
             Ok(BindDefinition::Enum {
                 attributes,
                 enum_: input.parse()?,
-                enum_of: input
-                    .peek(Token![:])
-                    .then(|| {
-                        Result::<_, syn::Error>::Ok((
-                            input.parse::<Token![:]>()?,
-                            input.parse::<TypePath>()?,
-                        ))
-                    })
-                    .transpose()?,
                 name: input.parse()?,
+                enum_of: input.parse_if(
+                    |input| input.peek(Token![:]),
+                    |input| Ok((input.parse()?, input.parse()?)),
+                )?,
                 variants_open: braced!(content in input),
                 variants: content.parse_terminated(BindVariant::parse, Token![,])?,
             })
@@ -245,15 +240,10 @@ impl Parse for BindVariant {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         Ok(Self {
             ident: input.parse()?,
-            rename: input
-                .peek(Token![=])
-                .then(|| {
-                    Result::<_, syn::Error>::Ok((
-                        input.parse::<Token![=]>()?,
-                        input.parse::<LitStr>()?,
-                    ))
-                })
-                .transpose()?,
+            rename: input.parse_if(
+                |input| input.peek(Token![=]),
+                |input| Ok((input.parse()?, input.parse()?)),
+            )?,
         })
     }
 }

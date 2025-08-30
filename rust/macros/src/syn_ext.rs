@@ -10,6 +10,12 @@ pub trait ParseStreamExt {
     where
         P: Token + Parse,
         U: Token;
+
+    fn parse_if<T>(
+        &self,
+        condition: fn(ParseStream) -> bool,
+        parser: fn(ParseStream) -> syn::Result<T>,
+    ) -> syn::Result<Option<T>>;
 }
 
 impl<'a> ParseStreamExt for ParseStream<'a> {
@@ -45,5 +51,17 @@ impl<'a> ParseStreamExt for ParseStream<'a> {
         }
 
         Ok(punctuated)
+    }
+
+    fn parse_if<T>(
+        &self,
+        condition: fn(ParseStream) -> bool,
+        parser: fn(ParseStream) -> syn::Result<T>,
+    ) -> syn::Result<Option<T>> {
+        if condition(self) {
+            Ok(Some(parser(self)?))
+        } else {
+            Ok(None)
+        }
     }
 }

@@ -9,25 +9,8 @@ rosttasse::bind! {
     }
 
     impl Hand {}
-}
 
-// use probe::{class::Instance, JavaClass};
-//
-// pub mod math;
-//
-// #[derive(JavaClass)]
-// #[package(net.minecraft.util)]
-// pub enum ActionResult {
-//     #[variant = "Pass"]
-//     PASS,
-//
-//     #[variant = "Success"]
-//     SUCCESS,
-// }
-//
-// #[derive(JavaClass)]
-// #[package(net.minecraft.util)]
-// pub struct Hand {
-//     #[instance]
-//     pub raw: Instance,
-// }
+    impl Identifier {
+        fn of(mod_id: String, id: String) -> Self;
+    }
+}
