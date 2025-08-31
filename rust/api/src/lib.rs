@@ -3,6 +3,8 @@
 pub extern crate jni;
 
 pub mod class;
+pub mod class_def;
+pub mod class_serializer;
 pub mod conversion;
 pub mod primitives;
 

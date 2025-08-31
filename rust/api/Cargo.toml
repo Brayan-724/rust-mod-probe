@@ -4,5 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+bitflags = { version = "2.9.3", features = ["serde"] }
 jni = "0.21.1"
 rosttasse_macros = { path = "../macros/" }
+serde = { version = "1.0.219", features = ["derive"] }
