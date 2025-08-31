@@ -7,14 +7,14 @@ use itertools::Itertools;
 use quote::{quote, quote_spanned};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::{Ident, Type};
+use syn::{Attribute, Ident, Type};
 use syn::{Token, TypePath};
 
 use crate::bind::parse::{
     BindDefinition, BindField, BindFieldMethod, BindFieldProperty, BindInput, BindPackage,
     BindVariant,
 };
-use crate::utils::get_attribute;
+use crate::utils::{get_attribute, get_rename_attr};
 
 pub fn bind(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let BindInput { package, defs } = syn::parse_macro_input!(input as BindInput);
@@ -32,7 +32,12 @@ fn bind_def(def: BindDefinition, package: &BindPackage) -> proc_macro2::TokenStr
             enum_of,
             ..
         } => bind_def_enum(name, variants, enum_of, package),
-        BindDefinition::Class { class, fields, .. } => bind_def_class(class, fields, package),
+        BindDefinition::Class {
+            attributes,
+            class,
+            fields,
+            ..
+        } => bind_def_class(attributes, class, fields, package),
     }
 }
 
@@ -52,7 +57,7 @@ fn bind_def_enum(
 
     let decl_variants = variants.iter().map(|v| &v.ident).collect_vec();
 
-    let sig = create_signature(&class, package);
+    let sig = create_signature(&class.to_string(), package);
 
     let signature = if is_itself {
         quote_spanned! {class.span() =>
@@ -167,6 +172,7 @@ fn bind_def_enum(
 }
 
 fn bind_def_class(
+    attributes: Vec<Attribute>,
     class: Ident,
     fields: Vec<BindField>,
     package: &BindPackage,
@@ -240,7 +246,7 @@ fn bind_def_class(
         }
     };
 
-    let sig = generate_signature(&class, package);
+    let sig = generate_signature(&attributes, &class, package);
 
     let other_fields = props
         .iter()
@@ -361,12 +367,21 @@ fn bind_fn_static(
     }
 }
 
-pub fn create_signature(class: &Ident, package: &BindPackage) -> String {
-    package.str.replace(".", "/") + "/" + &class.to_string()
+pub fn create_signature(class: &str, package: &BindPackage) -> String {
+    package.str.replace(".", "/") + "/" + class
 }
 
-pub fn generate_signature(class: &Ident, package: &BindPackage) -> proc_macro2::TokenStream {
-    let sig = create_signature(class, package);
+pub fn generate_signature(
+    attrs: &Vec<Attribute>,
+    class: &Ident,
+    package: &BindPackage,
+) -> proc_macro2::TokenStream {
+    let class_name = get_rename_attr(class.span(), attrs)
+        .ok()
+        .flatten()
+        .unwrap_or_else(|| class.to_string());
+
+    let sig = create_signature(&class_name, package);
 
     quote_spanned! {class.span() =>
         impl ::rosttasse::prelude::JSignature for #class {
@@ -387,7 +402,10 @@ struct MethodInfo {
 fn prepare_method(method: &BindFieldMethod) -> MethodInfo {
     let is_contructor = get_attribute(&"constructor", &method.attributes).is_some();
 
-    let extern_name = method.name.to_string().as_str().to_camel_lowercase();
+    let extern_name = get_rename_attr(method.name.span(), &method.attributes)
+        .ok()
+        .flatten()
+        .unwrap_or_else(|| method.name.to_string().as_str().to_camel_lowercase());
     let extern_name = quote!(#extern_name);
 
     let decl_params = method.params.iter().map(|param| {
