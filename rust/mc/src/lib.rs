@@ -21,13 +21,13 @@ rosttasse::bind! {
 }
 
 rosttasse::bind! {
-    use net.fabricmc.api.event;
+    use net.fabricmc.fabric.api.event;
 
     impl Event {}
 }
 
 rosttasse::bind! {
-    use net.fabricmc.api.itemgroup.v1;
+    use net.fabricmc.fabric.api.itemgroup.v1;
 
 
     impl ItemGroupEvents {

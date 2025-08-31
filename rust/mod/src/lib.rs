@@ -1,13 +1,14 @@
 use rosttasse::{JNIClass, JNIEnv};
 use rosttasse_mc::item::{ItemGroups, ItemSettings, Items};
-use rosttasse_mc::registry::RegistryKeys;
+use rosttasse_mc::registry::{RegistryKey, RegistryKeys};
+use rosttasse_mc::util::Identifier;
 use rosttasse_mc::ItemGroupEvents;
 
 use crate::items::SerjioItem;
 
 mod items;
 
-// const MOD_ID: &str = "apikaprobe";
+const MOD_ID: &str = "apikaprobe";
 
 // #[rosttasse::main]
 // fn main() {
@@ -19,7 +20,11 @@ pub extern "system" fn Java_me_apika_apikaprobe_RustBridge_main<'local>(
     _class: JNIClass<'local>,
 ) {
     let env = &mut env;
-    let item = Items::register::<SerjioItem>(RegistryKeys::ITEM, ItemSettings::default(env), env);
+
+    let id = Identifier::of(MOD_ID.to_string(), "serjio".to_string(), env);
+    let key = RegistryKey::of(RegistryKeys::ITEM, id, env);
+
+    let item = Items::register::<SerjioItem>(key, ItemSettings::default(env), env);
 
     ItemGroupEvents::modify_entries_event(ItemGroups::REDSTONE, env).register(item, env);
 }
